@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ttt-depl
+spec:
+  selector:
+    matchLabels:
+      app: tictac
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: tictac
+    spec:
+      containers:
+      - name: tictac
+        image: tictactoe
+        ports:
+        - containerPort: 9000
+

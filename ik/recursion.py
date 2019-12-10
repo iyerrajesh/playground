@@ -58,21 +58,46 @@ a = [1,2]
 print climbing_stairs(5, a)
 
 
-def n_queens(n, board):
+def has_conflict(board, i, j, n):
 
-	def helper(n, board, i):
-		if n == 0:
+	if board[i] != -1:
+		return True
+	if j in board:
+		return True
+
+	x = i-1
+	ic = 1
+	while x >= 0 and j-ic >= 0:
+		if board[x] == j-ic:
+			return True
+		x -= 1
+		ic += 1
+
+	x = i-1
+	ic = 1
+	while x >= 0 and j+ic < n:
+		if board[x] == j+ic:
+			return True
+		x -= 1
+		ic += 1
+
+	return False
+
+
+def n_queens(n, b):
+
+	def helper(nn, board, i):
+		if i == nn:
 			print board
 			return
 
-		for j in range(n):
-			if j not in board and board[i] == 0:
-				board[i] = j
-				helper (n-1, board, i+1)
-			else:
-				return
+		for j in range(nn):
+			if not has_conflict(board, i, j, nn):
+				b1 = board[:]
+				b1[i] = j
+				helper(nn, b1, i+1)
 
-	helper (n, board, 0)
+	helper(n, b, 0)
 
 
 def subsets(s):
@@ -91,3 +116,55 @@ def subsets(s):
 
 s = "xy"
 print subsets(s)
+
+b = [-1, -1, -1,-1]
+n_queens(4, b)
+# print has_conflict(b, 2, 0, 4)
+
+
+def calc(s):
+	num = 0
+	pre_op = '+'
+	s += '+'
+	stack = []
+	for c in s:
+		if c.isdigit():
+			num = num * 10 + int(c)
+		elif c == ' ':
+			pass
+		else:
+			if pre_op == '+':
+				stack.append(num)
+			elif pre_op == '*':
+				operant = stack.pop()
+				stack.append((operant * num))
+			num = 0
+			pre_op = c
+	return sum(stack)
+
+
+def generate_all_expressions(s, target):
+
+	def eval_helper (slate, i, o):
+
+		res = calc(slate)
+		if i == len(s):
+			if target == res:
+				o.append(slate)
+			return o
+
+		# if res > target:
+		# 	return o
+
+		eval_helper(slate+s[i], i+1, o)
+		eval_helper(slate+'+'+s[i], i+1, o)
+		eval_helper(slate+'*'+s[i], i+1, o)
+		return o
+
+	out = []
+	return eval_helper(s[0], 1, out)
+
+
+# g =  generate_all_expressions("050505", 5)
+# print len(g)
+# print g

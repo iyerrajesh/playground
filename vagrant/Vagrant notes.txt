@@ -1,0 +1,48 @@
+Vagrant notes
+
+Install vagrant
+Install virtual box 6.0 for Mac (later versions don’t work)
+Change user & privacy settings to allow install to complete.
+
+Use vagrant file, 
+$vagrant up
+After vagrant up, do this for docker
+sudo usermod -aG docker $USER
+Logout & ssh again
+
+**master 1pass
+Kutty!2345
+
+Running ES.mongo and pg
+docker run --name es -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:5.5.1
+
+docker run -p 27017:27017 --name mongodb -v ~/data/db:/data/db -d mongo
+
+docker run --rm --name pg -e POSTGRES_PASSWORD=docker -e 
+POSTGRES_USER=nakuldesai -d -p 5432:5432 -v /home/nakuldesai/pg_data:/var/lib/postgresql/data postgres
+
+
+git clone https://github.com/softwareyoga/docker-tomcat-tutorial.git
+ cd docker-tomcat-tutorial/
+docker build -t mywebapp .
+
+Prometheus
+docker run -d -p 9090:9090 -v /vagrant/work/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+
+Push gw
+docker run -d —name pmgw -p 9091:9091 prom/pushgateway
+
+
+Grafana
+docker run -d --name=grafana -p 3000:3000 grafana/grafana:6.5.3-ubuntu
+Configure hit://10.1.32.40:9090 as pm dash
+
+
+Docker Prune
+docker system prune -a --volumes
+
+
+docker build -f Dockerfile.new -t 022653893069.dkr.ecr.us-west-2.amazonaws.com/be/vuln:0.1 .
+
+
+ docker run -e CFG_FILE=/usr/local/src/config/mozilla_parser.yaml 022653893069.dkr.ecr.us-west-2.amazonaws.com/be/vuln:0.1 python3 /usr/local/src/job/vuln_job.py

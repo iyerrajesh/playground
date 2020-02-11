@@ -3,16 +3,16 @@ def permhelper(slate, array, perms):
 		perms.append(slate)
 	else:
 		for i in range(len(array)):
-			permhelper(slate+array[i], array[:i]+array[i+1:],perms)
+			permhelper(slate+array[i], array[:i]+array[i+1:], perms)
 	return perms
 
 
 def perms(c):
 	p = []
-	print permhelper("", c, p)
+	return permhelper("", c, p)
 
 
-perms('abc')
+print perms('1234')[8]
 
 
 def subset_tgt (array, tgt):
@@ -28,7 +28,7 @@ def subset_tgt (array, tgt):
 
 		return helper (inp_sum+array[j], j+1, tgt) + helper(inp_sum, j+1, tgt)
 
-	return helper (0,0,3)
+	return helper (0,0,tgt)
 
 
 a = [1,2,3]
@@ -55,11 +55,21 @@ def climbing_stairs(n, a):
 
 
 a = [1,2]
-print climbing_stairs(5, a)
+#print climbing_stairs(5, a)
+
+
+def print_board(b):
+	n = len(b)
+	out = ['*']*n
+	for i in range(n):
+		row = ['-']*n
+		row[b[i]] = 'q'
+		out[i] = ''.join(row)
+
+	return out
 
 
 def has_conflict(board, i, j, n):
-
 	if board[i] != -1:
 		return True
 	if j in board:
@@ -67,16 +77,10 @@ def has_conflict(board, i, j, n):
 
 	x = i-1
 	ic = 1
-	while x >= 0 and j-ic >= 0:
-		if board[x] == j-ic:
+	while ic < n:
+		if board[x] == j+ic < n:
 			return True
-		x -= 1
-		ic += 1
-
-	x = i-1
-	ic = 1
-	while x >= 0 and j+ic < n:
-		if board[x] == j+ic:
+		if board[x] == j-ic >= 0:
 			return True
 		x -= 1
 		ic += 1
@@ -84,20 +88,22 @@ def has_conflict(board, i, j, n):
 	return False
 
 
-def n_queens(n, b):
-
-	def helper(nn, board, i):
+def find_all_arrangements(n):
+	def helper(nn, board, i, cb):
 		if i == nn:
-			print board
-			return
+			cb.append(print_board(board))
+			return cb
 
 		for j in range(nn):
 			if not has_conflict(board, i, j, nn):
 				b1 = board[:]
 				b1[i] = j
-				helper(nn, b1, i+1)
+				cb = helper(nn, b1, i+1, cb)
+		return cb
 
-	helper(n, b, 0)
+	o = []
+	b = [-1]*n
+	return helper(n, b, 0, o)
 
 
 def subsets(s):
@@ -114,12 +120,9 @@ def subsets(s):
 	return subset_helper("",0,s_sets)
 
 
-s = "xy"
+s = "abc"
 print subsets(s)
-
-b = [-1, -1, -1,-1]
-n_queens(4, b)
-# print has_conflict(b, 2, 0, 4)
+#print find_all_arrangements(10)
 
 
 def calc(s):
@@ -127,6 +130,7 @@ def calc(s):
 	pre_op = '+'
 	s += '+'
 	stack = []
+
 	for c in s:
 		if c.isdigit():
 			num = num * 10 + int(c)
@@ -147,14 +151,14 @@ def generate_all_expressions(s, target):
 
 	def eval_helper (slate, i, o):
 
-		res = calc(slate)
 		if i == len(s):
+			if '+' not in slate and '*' not in slate:
+				res = int(slate)
+			else:
+				res = calc(slate)
 			if target == res:
 				o.append(slate)
 			return o
-
-		# if res > target:
-		# 	return o
 
 		eval_helper(slate+s[i], i+1, o)
 		eval_helper(slate+'+'+s[i], i+1, o)
@@ -165,6 +169,6 @@ def generate_all_expressions(s, target):
 	return eval_helper(s[0], 1, out)
 
 
-# g =  generate_all_expressions("050505", 5)
-# print len(g)
-# print g
+g =  generate_all_expressions("050505", 5)
+print len(g)
+print g

@@ -194,24 +194,26 @@ n2 = [2,4,6,7,8]
 # print union(n1,n2)
 
 n =[3,5,2,1,5,6,4,6]
-print sorted(n)
-done = False
-k = 7
-i = 1
-prev = None
-out = []
-
-while not done:
-	if i > len(n):
-		break
-	x = quickselect(n, i)
-	if x != prev:
-		out.append(x)
-	i += 1
-	prev = x
-	done = (len(out) == k)
-
-print out
+#print sorted(n)
+print quickselect(n,3)
+print quickselect(n,5)
+# done = False
+# k = 7
+# i = 1
+# prev = None
+# out = []
+#
+# while not done:
+# 	if i > len(n):
+# 		break
+# 	x = quickselect(n, i)
+# 	if x != prev:
+# 		out.append(x)
+# 	i += 1
+# 	prev = x
+# 	done = (len(out) == k)
+#
+# print out
 
 
 i = [

@@ -34,6 +34,41 @@ def find_all_well_formed_brackets(n):
 	return match(n, n, '', out)
 
 
-a = [-1,-2,3]
-k =
-print check_if_sum_possible(a,k)
+def is_palin(s):
+	i = 0
+	j = len(s)-1
+
+	while i < j:
+		if s[i] != s[j]:
+			return False
+		i += 1
+		j -= 1
+	return True
+
+
+def pal_helper(s, o, l, r, out):
+	if l == len(s):
+		out.append('|'.join(o))
+	else:
+		for i in range(l, r+1):
+			if is_palin(s[l:i+1]):
+				pal_helper(s, o+[s[l:i+1]], i+1, r, out)
+
+
+def pal_decomp(s):
+	out = []
+	o = []
+	pal_helper(s, o, 0, len(s)-1, out)
+	return out
+
+
+# ==================================================================
+# tests...
+# a = [-1,-2,3]
+# k =
+# print check_if_sum_possible(a,k)
+
+
+s = 'abracadabra'
+print pal_decomp(s)
+

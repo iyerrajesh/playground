@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 def check_if_sum_possible(arr, k):
 	def helper(arr, s, rsum, nelems):
 
@@ -62,6 +64,62 @@ def pal_decomp(s):
 	return out
 
 
+def equalSubSetSumPartition(nums):
+	# Write your code here
+
+    val_n = val_p = 0
+    for n in nums:
+        if n < 0:
+            val_n += n
+        else:
+            val_p += n
+    tot = val_n + val_p
+
+    if tot % 2 != 0:
+        return False
+
+    tot //= 2
+    n = len(nums)
+    dp = [defaultdict(bool) for _ in range(n)]
+
+    for x in range(n):
+        dp[x][0] = True
+
+    for i in range(n):
+        for j in range(val_n, val_p + 1):
+            dp[i][j] = dp[i - 1][j]
+            if j == nums[i]:
+                dp[i][j] = True
+            elif j - nums[i] >= val_n:
+                dp[i][j] = dp[i - 1][j] or dp[i - 1][j - nums[i]]
+
+    out = [False] * n
+
+    if not dp[n - 1][tot]:
+        return []
+
+    i = n - 1
+    j = tot
+    c = 0
+
+    while i >= 0:
+        if i == 0:
+            out[0] = True
+            c += 1
+        else:
+            if dp[i][j] and not dp[i - 1][j]:
+                out[i] = True
+                tot -= nums[i]
+                c += 1
+                if not tot:
+                    break
+        i -= 1
+
+    if c == n:
+        return []
+    return out
+
+
 # ==================================================================
 # tests...
 # a = [-1,-2,3]
@@ -69,6 +127,11 @@ def pal_decomp(s):
 # print check_if_sum_possible(a,k)
 
 
-s = 'abracadabra'
-print pal_decomp(s)
+# s = 'abracadabra'
+# print pal_decomp(s)
+
+nums = [1, 0, -1]
+print (equalSubSetSumPartition(nums))
+
+
 

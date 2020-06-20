@@ -57,6 +57,6 @@ def _combine(a, s, m, e):
 	return out
 
 
-
+# fix tab
 a = [4,1,0,10,7,8,1,2,16]
 print merge_sort(a)

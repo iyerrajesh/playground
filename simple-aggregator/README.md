@@ -1,5 +1,3 @@
-## Metronome Take-home Code Screen
-
 This package contains the solution to the problem.
 It is written in python leveraging the `pandas` package for data manipulations.
 

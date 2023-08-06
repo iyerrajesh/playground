@@ -96,6 +96,13 @@ class TestAggregateData:
         res = aggregate(events_detailed, cust, from_date, to_date)
         assert res == {'2022-3-1:T3:00:00': 1, '2022-3-1:T4:00:00': 1, '2022-3-1:T14:00:00': 1}
 
+    def test_same_day_arbitrary_hh_mm_ss(self, events_detailed):
+        cust = "b4f9279a0196e40632e947dd1a88e857"
+        from_date = "2022-03-01T02:18:10Z"
+        to_date = "2022-03-01T14:11:00Z"
+        res = aggregate(events_detailed, cust, from_date, to_date)
+        assert res ==  {'2022-3-1:T3:00:00': 1, '2022-3-1:T4:00:00': 1}
+
     def test_days_within_months(self, events_detailed):
         cust = "1abb42414607955dbf6088b99f837d8f"
         from_date = "2022-02-01T00:00:00Z"
@@ -118,4 +125,11 @@ class TestAggregateData:
         to_date = "2021-12-31T23:00:00Z"
         res = aggregate(events_detailed, cust, from_date, to_date)
         assert res == {'2020-3-1:T4:00:00': 1, '2021-3-1:T5:00:00': 1}
+
+    def test_different_days_arbitrary_hh_mm_ss(self, events_detailed):
+        cust = "b4f9279a0196e40632e947dd1a88e857"
+        from_date = "2022-03-01T03:18:10Z"
+        to_date = "2022-03-03T11:11:00Z"
+        res = aggregate(events_detailed, cust, from_date, to_date)
+        assert res == {'2022-3-1:T4:00:00': 1, '2022-3-1:T14:00:00': 1, '2022-3-2:T5:00:00': 1, '2022-3-2:T13:00:00': 1}
 

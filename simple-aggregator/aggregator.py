@@ -109,7 +109,7 @@ def aggregate(df: pd.DataFrame, cust: str, from_date: str, to_date: str) -> dict
                  (df['minute'] == to_dt.minute) &
                  (df['second'] >= from_dt.second) & (df['second'] <= to_dt.second)]
     buckets = pd.concat([ys, mms, ds, hs, ms, ss])
-    print(buckets)
+    # print(buckets)
     grouped = buckets.groupby(['year', 'month', 'day','hour'])
     r = grouped.count()['event_type'].to_dict()
 

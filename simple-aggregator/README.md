@@ -50,10 +50,14 @@ Should display the following usage details:
     -td TO_DATE, --to_date TO_DATE
                           start date for query (YYYY-MM-DD:THH:MM:SS:00Z)
 ```
-Example:
+Examples:
 ```commandline
    python3 aggregator.py -c b4f9279a0196e40632e947dd1a88e857 -f /Users/rajeshfamily/work/simple-aggregator/data/test2.csv 
   -fd 2022-03-01T01:00:00Z -td 2022-03-01T05:00:00Z
+  
+  python3 aggregator.py -c 1abb42414607955dbf6088b99f837d8f -f /Users/rajeshfamily/work/playground/simple-aggregator/data/events.csv 
+  -fd 2021-03-01T10:15:00Z -td 2021-03-02T14:15:10Z
+  
 ```
 ### Running Unit tests
 

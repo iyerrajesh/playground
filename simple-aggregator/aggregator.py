@@ -43,7 +43,6 @@ def aggregate(df: pd.DataFrame, cust: str, from_date: str, to_date: str) -> dict
                 (df['year'] == from_dt.year) & (df['month'] > from_dt.month) & (df['month'] < to_dt.month)]
 
     if diff_months or (diff_months == 0 and from_dt.month < to_dt.month):
-        # days d > f_d & d < t_d
         ds1 = df[(df['cust_id'] == cust) &
                  (df['year'] == from_dt.year) & (df['month'] == from_dt.month) & (df['day'] > from_dt.day)]
         ds2 = df[(df['cust_id'] == cust) &
@@ -55,23 +54,19 @@ def aggregate(df: pd.DataFrame, cust: str, from_date: str, to_date: str) -> dict
         ds = df[(df['cust_id'] == cust) &
                 (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
                 (df['day'] > from_dt.day) & (df['day'] < to_dt.day)]
-    #print(ds)
     # hours
     if diff.days or (diff.days == 0 and from_dt.day < to_dt.day):
-        # d == f_d & h > f_h & h <= 23 & d == t_d & h >= 0 & h < t_h()
         hs1 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
                  (df['day'] == from_dt.day) & (df['hour'] > from_dt.hour) & (df['hour'] <= 23)]
         hs2 = df[(df['cust_id'] == cust) & (df['year'] == to_dt.year) & (df['month'] == to_dt.month) &
                  (df['day'] == to_dt.day) & (df['hour'] >= 0) & (df['hour'] < to_dt.hour)]
         hs = pd.concat([hs1, hs2])
     else:
-        # d == f_d & h > f_h & h < t_h
         hs = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
                 (df['day'] == from_dt.day) &(df['hour'] > from_dt.hour) & (df['hour'] < to_dt.hour)]
 
     # mins
     if diff_hours or (diff_hours == 0 and from_dt.hour < to_dt.hour):
-        # h == f_h & m > f_m & m <= 59 & h == t_h & m >=0 & m < t_m
         ms1 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
                  (df['day'] == from_dt.day) &
                  (df['hour'] == from_dt.hour) & (df['minute'] > from_dt.minute) & (df['minute'] <= 59)]
@@ -80,17 +75,12 @@ def aggregate(df: pd.DataFrame, cust: str, from_date: str, to_date: str) -> dict
                  (df['hour'] == to_dt.hour) & (df['minute'] >= 0) & (df['minute'] < to_dt.minute)]
         ms = pd.concat([ms1, ms2])
     else:
-        # d == f_d  & h == f_h & m > f_m & m < t_m
         ms1 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
                 (df['day'] == from_dt.day) & (df['hour'] == from_dt.hour) &
                 (df['minute'] > from_dt.minute) & (df['minute'] < to_dt.minute) ]
-        # ms2 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
-        #         (df['day'] == to_dt.day) & (df['hour'] == to_dt.hour) & (df['minute'] <= to_dt.minute)]
         ms = pd.concat([ms1])
     # secs
     if diff_mins or (diff_mins == 0 and from_dt.minute < to_dt.minute):
-        # h == f_h & m == f_m & s >= f_s & s <=59
-        # h == t_h m == t_m & s >= 0 & s <= t_s
         ss1 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
                  (df['day'] == from_dt.day) &
                  (df['hour'] == from_dt.hour) & (df['minute'] == from_dt.minute) &
@@ -101,15 +91,12 @@ def aggregate(df: pd.DataFrame, cust: str, from_date: str, to_date: str) -> dict
                  (df['second'] >= 0) &(df['second'] <= to_dt.second)]
         ss = pd.concat([ss1,ss2])
     else:
-        # d == f_d & h == f_h & m == f_m & s >= f_s &\
-        # h == t_h & m == t_m & s <= t_s
         ss = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
                  (df['day'] == from_dt.day) & (df['hour'] == from_dt.hour) &
                  (df['minute'] == from_dt.minute) &
                  (df['minute'] == to_dt.minute) &
                  (df['second'] >= from_dt.second) & (df['second'] <= to_dt.second)]
     buckets = pd.concat([ys, mms, ds, hs, ms, ss])
-    # print(buckets)
     grouped = buckets.groupby(['year', 'month', 'day','hour'])
     r = grouped.count()['event_type'].to_dict()
 

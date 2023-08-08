@@ -21,42 +21,95 @@ def aggregate(df: pd.DataFrame, cust: str, from_date: str, to_date: str) -> dict
     df['second'] = df['timestamp'].dt.second
 
     diff = to_dt - from_dt
-    if diff.days > 0:
-        b1 = df[(df['cust_id'] == cust) &
-                (df['year'] >= from_dt.year) & (df['year'] <= to_dt.year) &
-                (df['month'] >= from_dt.month) & (df['month'] <= to_dt.month) &
-                (df['day'] > from_dt.day) & (df['day'] < to_dt.day)]
-        b2 = df[(df['cust_id'] == cust) &
-                (df['day'] == from_dt.day) & (df['month'] >= from_dt.month) & (df['year'] >= from_dt.year) &
-                (df['year'] <= to_dt.year) &
-                (df['hour'] > from_dt.hour) & (df['hour'] <= 23)]
-        b3 = df[(df['cust_id'] == cust) &
-                (df['day'] == from_dt.day) & (df['month'] >= from_dt.month) & (df['year'] >= from_dt.year) &
-                (df['year'] <= to_dt.year) &
-                (df['hour'] == from_dt.hour) & (df['minute'] >= from_dt.minute) & (df['second'] >= from_dt.second)]
-        b4 = df[(df['cust_id'] == cust) &
-                (df['day'] == to_dt.day) & (df['month'] <= to_dt.month) & (df['year'] >= from_dt.year) &
-                (df['year'] <= to_dt.year) &
-                (df['hour'] >= 0) & (df['hour'] < to_dt.hour)]
-        b5 = df[(df['cust_id'] == cust) &
-                (df['day'] == to_dt.day) & (df['month'] <= to_dt.month) & (df['year'] >= from_dt.year) &
-                (df['year'] <= to_dt.year) &
-                (df['hour'] == to_dt.hour) & (df['minute'] <= to_dt.minute) & (df['second'] <= to_dt.second)]
+    diff_years = diff.days // 365
+    diff_months = diff.days // 30
+    diff_hours = diff.seconds // 3600
+    diff_mins = diff.seconds // 60
 
-        buckets = pd.concat([b1, b2, b3, b4, b5])
+    if diff.days < 0:
+        return {"error": "to date is < from date"}
+
+    ys = df[(df['cust_id'] == cust) &
+             (df['year'] > from_dt.year) & (df['year'] < to_dt.year)]
+
+    if diff_years or (diff_years == 0 and from_dt.year < to_dt.year):
+        mms1 = df[(df['cust_id'] == cust) &
+                (df['year'] == from_dt.year) & (df['month'] > from_dt.month) & (df['month'] <= 12)]
+        mms2 = df[(df['cust_id'] == cust) &
+                  (df['year'] == to_dt.year) & (df['month'] >= 1) & (df['month'] < to_dt.month)]
+        mms = pd.concat([mms1, mms2])
     else:
-        b1 = df[(df['cust_id'] == cust) &
-                    (df['day'] == from_dt.day) & (df['month'] == from_dt.month) & (df['year'] == from_dt.year) &
-                    (df['hour'] > from_dt.hour) & (df['hour'] < to_dt.hour)]
-        b2 = df[(df['cust_id'] == cust) &
-                    (df['day'] == from_dt.day) & (df['month'] == from_dt.month) & (df['year'] == from_dt.year) &
-                    (df['hour'] == from_dt.hour) & (df['minute'] >= from_dt.minute) & (df['second'] >= from_dt.second)]
-        b3 = df[(df['cust_id'] == cust) &
-                    (df['day'] == to_dt.day) & (df['month'] == from_dt.month) & (df['year'] == from_dt.year) &
-                    (df['hour'] == to_dt.hour) & (df['minute'] <= to_dt.minute) & (df['second'] <= to_dt.second)]
+        mms = df[(df['cust_id'] == cust) &
+                (df['year'] == from_dt.year) & (df['month'] > from_dt.month) & (df['month'] < to_dt.month)]
 
-        buckets = pd.concat([b1, b2, b3])
+    if diff_months or (diff_months == 0 and from_dt.month < to_dt.month):
+        # days d > f_d & d < t_d
+        ds1 = df[(df['cust_id'] == cust) &
+                 (df['year'] == from_dt.year) & (df['month'] == from_dt.month) & (df['day'] > from_dt.day)]
+        ds2 = df[(df['cust_id'] == cust) &
+                (df['year'] == to_dt.year) & (df['month'] == to_dt.month) & (df['day'] >= 1) &
+                (df['day'] < to_dt.day)]
 
+        ds = pd.concat([ds1, ds2])
+    else:
+        ds = df[(df['cust_id'] == cust) &
+                (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
+                (df['day'] > from_dt.day) & (df['day'] < to_dt.day)]
+    #print(ds)
+    # hours
+    if diff.days or (diff.days == 0 and from_dt.day < to_dt.day):
+        # d == f_d & h > f_h & h <= 23 & d == t_d & h >= 0 & h < t_h()
+        hs1 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
+                 (df['day'] == from_dt.day) & (df['hour'] > from_dt.hour) & (df['hour'] <= 23)]
+        hs2 = df[(df['cust_id'] == cust) & (df['year'] == to_dt.year) & (df['month'] == to_dt.month) &
+                 (df['day'] == to_dt.day) & (df['hour'] >= 0) & (df['hour'] < to_dt.hour)]
+        hs = pd.concat([hs1, hs2])
+    else:
+        # d == f_d & h > f_h & h < t_h
+        hs = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
+                (df['day'] == from_dt.day) &(df['hour'] > from_dt.hour) & (df['hour'] < to_dt.hour)]
+
+    # mins
+    if diff_hours or (diff_hours == 0 and from_dt.hour < to_dt.hour):
+        # h == f_h & m > f_m & m <= 59 & h == t_h & m >=0 & m < t_m
+        ms1 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
+                 (df['day'] == from_dt.day) &
+                 (df['hour'] == from_dt.hour) & (df['minute'] > from_dt.minute) & (df['minute'] <= 59)]
+        ms2 = df[(df['cust_id'] == cust) & (df['year'] == to_dt.year) & (df['month'] == to_dt.month) &
+                 (df['day'] == to_dt.day) &
+                 (df['hour'] == to_dt.hour) & (df['minute'] >= 0) & (df['minute'] < to_dt.minute)]
+        ms = pd.concat([ms1, ms2])
+    else:
+        # d == f_d  & h == f_h & m > f_m & m < t_m
+        ms1 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
+                (df['day'] == from_dt.day) & (df['hour'] == from_dt.hour) &
+                (df['minute'] > from_dt.minute) & (df['minute'] < to_dt.minute) ]
+        # ms2 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
+        #         (df['day'] == to_dt.day) & (df['hour'] == to_dt.hour) & (df['minute'] <= to_dt.minute)]
+        ms = pd.concat([ms1])
+    # secs
+    if diff_mins or (diff_mins == 0 and from_dt.minute < to_dt.minute):
+        # h == f_h & m == f_m & s >= f_s & s <=59
+        # h == t_h m == t_m & s >= 0 & s <= t_s
+        ss1 = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
+                 (df['day'] == from_dt.day) &
+                 (df['hour'] == from_dt.hour) & (df['minute'] == from_dt.minute) &
+                 (df['second'] >= from_dt.second) & (df['second'] <= 59)]
+        ss2 = df[(df['cust_id'] == cust) & (df['year'] == to_dt.year) & (df['month'] == to_dt.month) &
+                 (df['day'] == to_dt.day) &
+                 (df['hour'] == to_dt.hour) &(df['minute'] == to_dt.minute) &
+                 (df['second'] >= 0) &(df['second'] <= to_dt.second)]
+        ss = pd.concat([ss1,ss2])
+    else:
+        # d == f_d & h == f_h & m == f_m & s >= f_s &\
+        # h == t_h & m == t_m & s <= t_s
+        ss = df[(df['cust_id'] == cust) & (df['year'] == from_dt.year) & (df['month'] == from_dt.month) &
+                 (df['day'] == from_dt.day) & (df['hour'] == from_dt.hour) &
+                 (df['minute'] == from_dt.minute) &
+                 (df['minute'] == to_dt.minute) &
+                 (df['second'] >= from_dt.second) & (df['second'] <= to_dt.second)]
+    buckets = pd.concat([ys, mms, ds, hs, ms, ss])
+    print(buckets)
     grouped = buckets.groupby(['year', 'month', 'day','hour'])
     r = grouped.count()['event_type'].to_dict()
 

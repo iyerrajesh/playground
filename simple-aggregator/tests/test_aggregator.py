@@ -18,11 +18,11 @@ def events_sample():
 @pytest.fixture(scope="module")
 def events_detailed():
     data = [
-        ["b4f9279a0196e40632e947dd1a88e857", "event_1", "txn1", "2002-03-01 03:01:00.154+00"],
+        ["b4f9279a0196e40632e947dd1a88e857", "event_1", "txn1", "2002-03-01 03:01:28.154+00"],
         ["b4f9279a0196e40632e947dd1a88e857", "event_2", "txn2", "2012-03-01 04:29:00.154+00"],
         ["b4f9279a0196e40632e947dd1a88e857", "event_3", "txn3", "2020-03-01 04:15:00.154+00"],
         ["b4f9279a0196e40632e947dd1a88e857", "event_4", "txn4", "2021-03-01 05:08:00.154+00"],
-        ["b4f9279a0196e40632e947dd1a88e857", "event_1", "txn1", "2022-03-01 03:01:00.154+00"],
+        ["b4f9279a0196e40632e947dd1a88e857", "event_1", "txn1", "2022-03-01 03:01:23.154+00"],
         ["30330c9c4e7173ba9474c46ee5191570", "event_2", "txn2", "2022-03-01 04:29:00.154+00"],
         ["b4f9279a0196e40632e947dd1a88e857", "event_3", "txn3", "2022-03-01 04:15:00.154+00"],
         ["b4f9279a0196e40632e947dd1a88e857", "event_4", "txn4", "2022-03-02 05:08:00.154+00"],
@@ -57,14 +57,14 @@ class TestAggregateBasic:
         from_date = "2021-03-04 05:00:00.154+00"
         to_date = "2021-03-03 03:00:00.154+00"
         res = aggregate(events_sample, cust, from_date, to_date)
-        assert res == {}
+        assert res ==  {'error': 'to date is < from date'}
 
     def test_from_time_gt_end_time(self, events_sample):
         cust = "customer_id_1"
         from_date = "2021-03-03 05:00:00Z"
         to_date = "2021-03-03 03:00:00Z"
         res = aggregate(events_sample, cust, from_date, to_date)
-        assert res == {}
+        assert res ==  {'error': 'to date is < from date'}
 
     def test_invalid_date_format(self, events_sample):
         cust = "customer_id_1"
@@ -99,9 +99,9 @@ class TestAggregateData:
     def test_same_day_arbitrary_hh_mm_ss(self, events_detailed):
         cust = "b4f9279a0196e40632e947dd1a88e857"
         from_date = "2022-03-01T02:18:10Z"
-        to_date = "2022-03-01T14:11:00Z"
+        to_date = "2022-03-01T14:11:10Z"
         res = aggregate(events_detailed, cust, from_date, to_date)
-        assert res ==  {'2022-3-1:T3:00:00': 1, '2022-3-1:T4:00:00': 1}
+        assert res == {'2022-3-1:T3:00:00': 1, '2022-3-1:T4:00:00': 1}
 
     def test_days_within_months(self, events_detailed):
         cust = "1abb42414607955dbf6088b99f837d8f"

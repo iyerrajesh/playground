@@ -1,0 +1,30 @@
+flowchart TD
+    A[Client] --> B[Request Handler]
+    B --> C[Coordinator (per request)]
+    C --> D1[Replica A]
+    C --> D2[Replica B]
+    C --> D3[Replica C]
+
+    subgraph Replica Write Path
+        D1 --> E1[WAL / Commit Log]
+        E1 --> F1[Memtable]
+        F1 --> G1[Flush → SSTable]
+    end
+
+    subgraph Background
+        G1 --> H1[Compaction]
+    end
+
+    C --> I[Wait for Consistency Level (QUORUM/ONE/ALL)]
+    I --> J[Ack to Client]
+
+    %% Read Path
+    A --> R1[Read Request]
+    R1 --> C
+    C --> K1[Read from replicas]
+    K1 --> L1[Memtable / Cache / SSTables]
+    L1 --> M1[Merge + Reconcile Versions]
+    M1 --> N1[Return Result]
+
+    %% Repair
+    M1 --> O1[Read Repair (optional)]

@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
     A[Client] --> B[Request Handler]
     B --> C[Coordinator (per request)]
